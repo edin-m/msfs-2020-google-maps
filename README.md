@@ -10,3 +10,9 @@
 - Copy fs-base-ingamepanels-custom to the Packages/Community
 - WIP is the renaming of the files and folders
 - Potential issues: The Maps window might not be able to move, reload the panel and it should be
+
+# Additional
+
+- An ability to automatically reset elevator trim when AP goes off
+- Elevator trim label
+- ETE time label
