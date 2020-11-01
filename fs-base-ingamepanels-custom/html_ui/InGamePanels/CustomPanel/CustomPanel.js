@@ -37,7 +37,7 @@ class IngamePanelMaps extends HTMLElement {
 	}
 	
     isDebugEnabled() {
-        var self = this;
+        /*var self = this;
         if (typeof g_modDebugMgr != "undefined") {
             g_modDebugMgr.AddConsole(null);
             g_modDebugMgr.AddDebugButton("ButtonCustomID1", function() {
@@ -71,10 +71,10 @@ class IngamePanelMaps extends HTMLElement {
                 } else {
                     setTimeout(() => {
                         self.isDebugEnabled();
-                    }, 2000);//*/
+                    }, 2000);
                 }
             });
-        }
+        }//*/
     }
 	
 	onBtnToggleLockMapValidated() {
@@ -186,7 +186,7 @@ class IngamePanelMaps extends HTMLElement {
             this.updateImage();
         });*/
 		
-		Include.addScript("/JS/debug.js", function () {
+		/*Include.addScript("/JS/debug.js", function () {
 			g_modDebugMgr.AddConsole(null);
 		});//*/
 		
@@ -213,7 +213,7 @@ class IngamePanelMaps extends HTMLElement {
 		this._flightPlanPolyline = null;
 		
 		this.domEl_btnResetElevatorTrimOnApOff = document.querySelector("#btnResetElevatorTrimOnApOff");
-		this.domEl_lblElTrimPct = document.querySelector("#lblElevatorPos");
+
 			
 		setTimeout(() => {
 			if (!GoogleMap) return;
@@ -228,7 +228,70 @@ class IngamePanelMaps extends HTMLElement {
 		this.registerListeners();
 		
 		setTimeout(this.initGoogleMap.bind(this), 1000);
+		
+		this.domEl_elTrimMinus = document.querySelector("#elTrimMinus");
+		this.domEl_elTrimReset = document.querySelector("#elTrimReset");
+		this.domEl_elTrimPlus = document.querySelector("#elTrimPlus");
+		this.domEl_ailTrimMinus = document.querySelector("#ailTrimMinus");
+		this.domEl_ailTrimReset = document.querySelector("#ailTrimReset");
+		this.domEl_ailTrimPlus = document.querySelector("#ailTrimPlus");
+		this.domEl_rudTrimMinus = document.querySelector("#rudTrimMinus");
+		this.domEl_rudTrimReset = document.querySelector("#rudTrimReset");
+		this.domEl_rudTrimPlus = document.querySelector("#rudTrimPlus");
+		
+		this.domEl_elTrimMinus.addEventListener("OnValidate", () => {
+			this.changeElevatorTrimPosition(-1);
+		});
+		this.domEl_elTrimReset.addEventListener("OnValidate", () => {
+			this.setSimVarResetElevatorTrim();
+		});
+		this.domEl_elTrimPlus.addEventListener("OnValidate", () => {
+			this.changeElevatorTrimPosition(1);
+		});
+		
+		this.domEl_ailTrimMinus.addEventListener("OnValidate", () => {
+			this.changeAileronPosition(-1);
+		});
+		this.domEl_ailTrimReset.addEventListener("OnValidate", () => {
+			this.setSimVarResetAileronTrim();
+		});
+		this.domEl_ailTrimPlus.addEventListener("OnValidate", () => {
+			this.changeAileronPosition(1);
+		});
+		
+		this.domEl_rudTrimMinus.addEventListener("OnValidate", () => {
+			this.changeRudderTrim(-1);
+		});
+		this.domEl_rudTrimReset.addEventListener("OnValidate", () => {
+			this.setSimVarResetRudderTrim();
+		});
+		this.domEl_rudTrimPlus.addEventListener("OnValidate", () => {
+			this.changeRudderTrim(1);
+		});
     }
+	
+	changeElevatorTrimPosition(dir) {
+		const step = 0.34*dir;
+		let elval = this.getSimVar("ELEVATOR TRIM POSITION", "Radians");
+		elval += (step/100.0);
+		SimVar.SetSimVarValue("ELEVATOR TRIM POSITION", "Radians", elval);
+	}
+	
+	changeAileronPosition(dir) {
+		// -1 left, 1 right
+		const step = 1*dir;
+		let ailTrimPct = this.getSimVar("AILERON TRIM PCT", "Float");
+		ailTrimPct += (step/100.0);
+		SimVar.SetSimVarValue("AILERON TRIM PCT", "Float", ailTrimPct);
+	}
+	
+	changeRudderTrim(dir) {
+		// -1 left, 1 right
+		const step = 1*dir;
+		let rudTrimPct = this.getSimVar("RUDDER TRIM PCT", "Float");
+		rudTrimPct += (step/100.0);
+		SimVar.SetSimVarValue("RUDDER TRIM PCT", "Float", rudTrimPct);
+	}
 	
 	registerListeners() {
 		this.registerApListener();
@@ -247,13 +310,13 @@ class IngamePanelMaps extends HTMLElement {
 	}
 	
 	apListenerCb() {
-		this.resetTrim();	
+		this.resetElTrimOnApOff();	
 		
-		this.updateElevatorPctLabel();
+		this.updateTrimLabels();
 		this.updateApMasterLabel();
 	}
 	
-	resetTrim() {
+	resetElTrimOnApOff() {
 		let newApVal = this.getSimVarApMaster();
 		let oldApVal = this.valApMaster;
 		
@@ -266,9 +329,24 @@ class IngamePanelMaps extends HTMLElement {
 		this.valApMaster = newApVal;
 	}
 	
-	updateElevatorPctLabel() {
+	updateTrimLabels() {
+		let elevPos = this.getSimVar("ELEVATOR POSITION", "number");
 		let elevatorPct = this.getSimVar("ELEVATOR TRIM PCT", "number");
-		this.domEl_lblElTrimPct.innerHTML = 'TRIM: ' + Math.round(elevatorPct*100) + "%";
+		
+		let ailpos = this.getSimVar("AILERON POSITION", "number");
+		let aileronPct = this.getSimVar("AILERON TRIM PCT", "number");
+		
+		let ruddpos = this.getSimVar("RUDDER POSITION", "number");
+		let ruddtrimpct = this.getSimVar("RUDDER TRIM PCT", "number");
+		
+		let eltitle = `EL: ${Math.round(elevPos*100)}% (${Math.round(elevatorPct*100)}%)`;
+		this.domEl_elTrimReset.setAttribute("title", eltitle);
+		
+		let ailtitle = `AIL: ${Math.round(ailpos*100)}% (${Math.round(aileronPct*100)}%)`;
+		this.domEl_ailTrimReset.setAttribute("title", ailtitle);
+		
+		let rudtitle = `RD: ${Math.round(ruddpos*100)}% (${Math.round(ruddtrimpct*100)}%)`;
+		this.domEl_rudTrimReset.setAttribute("title", rudtitle);
 	}
 	
 	updateApMasterLabel() {
@@ -291,6 +369,18 @@ class IngamePanelMaps extends HTMLElement {
 	
 	setSimVarResetElevatorTrim() {
 		SimVar.SetSimVarValue("ELEVATOR TRIM POSITION", "Radians", 0.0);
+	}
+	
+	setSimVarResetAileronTrim() {
+		SimVar.SetSimVarValue("AILERON TRIM PCT", "number", 0.0);
+	}
+	
+	setSimVarResetRudderTrim() {
+		SimVar.SetSimVarValue("RUDDER TRIM PCT", "number", 0.0);
+	}
+	
+	setSimVar(name, type, value) {
+		SimVar.SetSimVarValue(name, type, value);
 	}
 	
     updateImage() {

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -80,6 +80,17 @@ body {
 	background-color:rgba(200,0,0,0.9);
 }
 
+new-push-button {
+	width: 25px;
+	text-align: center;
+	padding-left:auto;
+	padding-right:auto;
+}
+
+new-push-button.auto {
+	width: 150px;
+}
+
 	</style>
 </head>
 
@@ -103,7 +114,19 @@ body {
 				<section class="footerbar">
 					<span id="lblApMaster" style="margin-top:auto;margin-bottom:auto;padding-left:10px;padding-right:10px;;">AP MASTER</span>
 					<toggle-button id="btnResetElevatorTrimOnApOff" title="AP RESET TRIM"></toggle-button>
-					<label id="lblElevatorPos" class="ete">elev pos</label>
+				</section>
+				<section class="footerbar ete">
+					<new-push-button class="small" title="-" id="elTrimMinus"></new-push-button>
+					<new-push-button class="small auto" title="" id="elTrimReset"></new-push-button>
+					<new-push-button class="small" title="+" id="elTrimPlus"></new-push-button>
+					<span class="width:20px;">&nbsp;&nbsp;</span>
+					<new-push-button class="small" title="-" id="ailTrimMinus"></new-push-button>
+					<new-push-button class="small auto" title="" id="ailTrimReset"></new-push-button>
+					<new-push-button class="small" title="+" id="ailTrimPlus"></new-push-button>
+					<span class="width:20px;">&nbsp;&nbsp;</span>
+					<new-push-button class="small" title="-" id="rudTrimMinus"></new-push-button>
+					<new-push-button class="small auto" title="" id="rudTrimReset"></new-push-button>
+					<new-push-button class="small" title="+" id="rudTrimPlus"></new-push-button>
 				</section>
             </section>
         </ingame-ui>
